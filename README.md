@@ -35,4 +35,12 @@ Esto explica por qué LOC domina con 31 ocurrencias frente a 17 de ORG. buena pa
 ## 4. ¿Cómo influye el score en tu confianza?
 
 El score es una señal útil pero asimétrica y no calibrada, y conviene tratarlo como tal. Donde sí funciona. Los scores bajos fueron buenos detectores de dificultad. Las cinco reseñas de menor confianza son precisamente casos genuinamente ambiguos: doble negación, texto de una palabra, opinión tibia y opinión mixta. Es decir, un score bajo es una alerta confiable de que hay que revisar manualmente. Donde no funciona. Un score alto no garantiza que la predicción sea correcta.  
-La razón técnica es que el score es simplemente el softmax sobre los logits de la última capa, mide qué tan consistente es la entrada con los patrones aprendidos, no qué tan probable es que la respuesta sea verdadera
+La razón técnica es que el score es simplemente el softmax sobre los logits de la última capa, mide qué tan consistente es la entrada con los patrones aprendidos, no qué tan probable es que la respuesta sea verdadera.
+
+## 5. ¿Qué datos etiquetarías manualmente para calcular precision, recall y F1?
+
+Para sentimiento. Un conjunto de al menos 300–500 reseñas del mismo dominio, etiquetadas manualmente con el esquema POSITIVE / NEGATIVE / NEUTRAL, y balanceado. No replicando el sesgo 19/11/2 de este conjunto, sino con representación suficiente de cada clase. Para que el recall de NEUTRAL sea medible. Incluiría deliberadamente subconjuntos de casos difíciles (sarcasmo, negación, opiniones mixtas) marcados con una columna adicional de categoría, para poder reportar F1 desagregado por tipo de dificultad y no solo un promedio global que los oculte. Añadiría también una columna de sentimiento por aspecto (comida / servicio / precio / ambiente), porque es la única forma honesta de evaluar reseñas mixtas.  
+
+## 6. ¿Usarías estas predicciones para tomar decisiones automáticas importantes? ¿Por qué?
+
+No, no para decisiones importantes y automáticas. La reseña 14 es el argumento decisivo: un cliente describe dos horas de espera y comida fría, y el sistema lo registra como opinión positiva con 0.96 de confianza. Ningún umbral automático habría detenido ese error. Si esas predicciones alimentaran un tablero de satisfacción del cliente, la queja desaparecería del reporte. Ademas, las opiniones mixtas y sarcásticas se colapsan de manera predecible, y NER confunde ORG con LOC de forma consistente.
